@@ -107,6 +107,12 @@ public class CalculatorOverlay {
         minimize.setBackground(shape(Color.rgb(43, 52, 60), 12));
         header.addView(minimize, new LinearLayout.LayoutParams(dp(38), dp(32)));
         minimize.setOnClickListener(v -> { compact = true; savePosition(); showCurrent(); });
+        TextView close = text("×", 21, Color.WHITE);
+        close.setBackground(shape(Color.rgb(145, 55, 61), 12));
+        LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams(dp(38), dp(32));
+        closeParams.leftMargin = dp(6);
+        header.addView(close, closeParams);
+        close.setOnClickListener(v -> context.stopService(new android.content.Intent(context, CalculatorService.class)));
         header.setOnTouchListener((v, event) -> handleDrag(v, event, false));
         panel.addView(header);
 
@@ -173,17 +179,19 @@ public class CalculatorOverlay {
                 return;
             }
         } else if (key.equals("±")) {
-            if (!expression.isEmpty()) {
+            if (expression.isEmpty()) {
+                expression = "−";
+            } else {
                 int start = expression.length() - 1;
                 while (start >= 0 && (Character.isDigit(expression.charAt(start)) || expression.charAt(start) == '.')) start--;
                 String number = expression.substring(start + 1);
                 if (!number.isEmpty()) {
-                    if (start >= 0 && expression.charAt(start) == '-' && (start == 0 || "(+−×÷^".indexOf(expression.charAt(start - 1)) >= 0)) {
+                    if (start >= 0 && expression.charAt(start) == '−' && (start == 0 || "(+−×÷^".indexOf(expression.charAt(start - 1)) >= 0)) {
                         expression = expression.substring(0, start) + number;
                     } else {
                         expression = expression.substring(0, start + 1) + "−" + number;
                     }
-                } else if (expression.isEmpty()) expression = "−";
+                }
             }
             justEvaluated = false;
         } else if (key.equals("√")) {
